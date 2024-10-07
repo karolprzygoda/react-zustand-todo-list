@@ -36,22 +36,18 @@ const useTodoStore = create<State & Actions>((set) => ({
     }));
   },
   setIsPinned: (id) => {
-    set(({ todos }) => {
-      const updatedTodos = todos.map((todo) =>
+    set(({ todos }) => ({
+      todos: todos.map((todo) =>
         todo.id === id ? { ...todo, isPinned: !todo.isPinned } : todo,
-      );
-      localStorage.setItem("todos", JSON.stringify(updatedTodos));
-      return { todos: updatedTodos };
-    });
+      ),
+    }));
   },
   setIsChecked: (id) => {
-    set(({ todos }) => {
-      const updatedTodos = todos.map((todo) =>
+    set(({ todos }) => ({
+      todos: todos.map((todo) =>
         todo.id === id ? { ...todo, isChecked: !todo.isChecked } : todo,
-      );
-      localStorage.setItem("todos", JSON.stringify(updatedTodos));
-      return { todos: updatedTodos };
-    });
+      ),
+    }));
   },
   incrementDay: () => {
     set(({ currentDate, timeRange }) => {
@@ -108,31 +104,35 @@ const useTodoStore = create<State & Actions>((set) => ({
     });
   },
   editTodo: (id, todoDescription) => {
-    set(({ todos }) => {
-      const newTodos = todos.map((todo) =>
+    set(({ todos }) => ({
+      todos: todos.map((todo) =>
         todo.id === id ? { ...todo, todoDescription: todoDescription } : todo,
-      );
-      localStorage.setItem("todos", JSON.stringify(newTodos));
-      return { todos: newTodos };
-    });
+      ),
+    }));
   },
   addTodo: (newTodo) => {
-    set(({ todos }) => {
-      localStorage.setItem("todos", JSON.stringify([...todos, newTodo]));
-      return { todos: [...todos, newTodo] };
-    });
+    set(({ todos }) => ({
+      todos: [...todos, newTodo],
+    }));
   },
   deleteTodo: (id) => {
-    set(({ todos }) => {
-      const updatedTodos = todos.filter((todo) => todo.id !== id);
-      localStorage.setItem("todos", JSON.stringify(updatedTodos));
-      return { todos: updatedTodos };
-    });
+    set(({ todos }) => ({
+      todos: todos.filter((todo) => todo.id !== id),
+    }));
   },
 }));
 
-useTodoStore.setState(() => ({
-  todos: JSON.parse(<string>localStorage.getItem("todos")) ?? [],
-}));
+const initializeStore = () => {
+  try {
+    const storedTodos = localStorage.getItem("todos");
+    if (storedTodos) {
+      useTodoStore.setState({ todos: JSON.parse(storedTodos) });
+    }
+  } catch (error) {
+    console.error("Failed to initialize store from localStorage:", error);
+  }
+};
+
+initializeStore();
 
 export default useTodoStore;
