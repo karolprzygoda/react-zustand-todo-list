@@ -1,9 +1,16 @@
 import useTodoStore, { Todo } from "@/stores/todoStore.ts";
 import { useMemo } from "react";
 import { isSameDay, isSameMonth, isSameYear } from "@/lib/utils.ts";
+import { useShallow } from "zustand/react/shallow";
 
 const useFilteredTodos = () => {
-  const { currentDate, todos, timeRange } = useTodoStore();
+  const { currentDate, todos, timeRange } = useTodoStore(
+    useShallow((state) => ({
+      currentDate: state.currentDate,
+      todos: state.todos,
+      timeRange: state.timeRange,
+    })),
+  );
 
   return useMemo(() => {
     const filterTodo = (todo: Todo) => {

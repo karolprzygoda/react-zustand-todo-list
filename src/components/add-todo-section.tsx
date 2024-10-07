@@ -3,9 +3,16 @@ import { ActivityLogIcon } from "@radix-ui/react-icons";
 import useTodoStore from "@/stores/todoStore.ts";
 import { toast } from "@/hooks/use-toast.ts";
 import { ChangeEvent, FormEvent, useState } from "react";
+import { useShallow } from "zustand/react/shallow";
 
 const AddTodoSection = () => {
-  const { currentDate, todos, addTodo } = useTodoStore((state) => state);
+  const { currentDate, todos, addTodo } = useTodoStore(
+    useShallow((state) => ({
+      currentDate: state.currentDate,
+      todos: state.todos,
+      addTodo: state.addTodo,
+    })),
+  );
 
   const [todoDescription, setTodoDescription] = useState("");
 

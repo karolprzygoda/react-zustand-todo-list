@@ -21,10 +21,16 @@ import {
 import { Input } from "@/components/ui/input.tsx";
 import { useState } from "react";
 import { Button } from "@/components/ui/button.tsx";
+import { useShallow } from "zustand/react/shallow";
 
 const TaskItem = ({ todo }: { todo: Todo }) => {
   const { deleteTodo, setIsChecked, setIsPinned, editTodo } = useTodoStore(
-    (state) => state,
+    useShallow((state) => ({
+      deleteTodo: state.deleteTodo,
+      setIsChecked: state.setIsChecked,
+      setIsPinned: state.setIsPinned,
+      editTodo: state.editTodo,
+    })),
   );
 
   const [updateTask, setUpdateTask] = useState(todo.todoDescription);

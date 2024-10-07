@@ -3,10 +3,16 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import ButtonIcon from "@/components/button-icon.tsx";
 import useTodoStore from "@/stores/todoStore.ts";
 import { DAYS, MONTHS } from "@/lib/utils.ts";
+import { useShallow } from "zustand/react/shallow";
 
 const CurrentDateSection = () => {
   const { currentDate, incrementDay, decrementDay, timeRange } = useTodoStore(
-    (state) => state,
+    useShallow((state) => ({
+      currentDate: state.currentDate,
+      incrementDay: state.incrementDay,
+      decrementDay: state.decrementDay,
+      timeRange: state.timeRange,
+    })),
   );
 
   const handleTimeRangeChange = () => {

@@ -10,11 +10,17 @@ import ContentContainer from "@/components/ui/content-container";
 import { MenuBar, MenuBarButton } from "@/components/ui/menu-bar";
 import TodosList from "@/components/todos-list";
 import useFilteredTodos from "@/hooks/use-filtred-todos.ts";
+import { useShallow } from "zustand/react/shallow";
 
 const TIME_RANGES: TimeRangeType[] = ["Day", "Month", "Year"];
 
 const App = () => {
-  const { timeRange, setTimeRange } = useTodoStore();
+  const { timeRange, setTimeRange } = useTodoStore(
+    useShallow((state) => ({
+      timeRange: state.timeRange,
+      setTimeRange: state.setTimeRange,
+    })),
+  );
   const filteredTodos = useFilteredTodos();
 
   const { pinnedTodos, unpinnedTodos } = useMemo(() => {
