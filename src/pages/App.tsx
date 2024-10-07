@@ -1,35 +1,70 @@
-import { useState } from "react";
-import reactLogo from "../assets/react.svg";
-import viteLogo from "/vite.svg";
-import "./App.css";
+import { useMemo } from "react";
+import CurrentDateSection from "@/components/current-date-section.tsx";
+import AddTodoSection from "@/components/add-todo-section";
+import TaskItem from "@/components/task-item";
+import useTodoStore from "@/stores/todoStore";
+import { TimeRangeType } from "@/lib/utils";
+import { ThemeProvider } from "@/components/theme-provider";
+import AppContainer from "@/components/ui/app-container";
+import ContentContainer from "@/components/ui/content-container";
+import { MenuBar, MenuBarButton } from "@/components/ui/menu-bar";
+import TodosList from "@/components/todos-list";
+import useFilteredTodos from "@/hooks/use-filtred-todos.ts";
 
-function App() {
-  const [count, setCount] = useState(0);
+const TIME_RANGES: TimeRangeType[] = ["Day", "Month", "Year"];
+
+const App = () => {
+  const { timeRange, setTimeRange } = useTodoStore();
+  const filteredTodos = useFilteredTodos();
+
+  const { pinnedTodos, unpinnedTodos } = useMemo(() => {
+    return {
+      pinnedTodos: filteredTodos.filter((todo) => todo.isPinned),
+      unpinnedTodos: filteredTodos.filter((todo) => !todo.isPinned),
+    };
+  }, [filteredTodos]);
 
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+      <AppContainer className="md:py-8">
+        <ContentContainer>
+          <MenuBar className="gap-10">
+            {TIME_RANGES.map((range) => (
+              <MenuBarButton
+                key={range}
+                onClick={() => setTimeRange(range)}
+                isActive={timeRange === range}
+              >
+                {range}
+              </MenuBarButton>
+            ))}
+          </MenuBar>
+          <CurrentDateSection />
+          {timeRange === "Day" && <AddTodoSection />}
+          <TodosList className="relative h-full px-5 md:px-20">
+            {filteredTodos.length > 0 ? (
+              <>
+                {pinnedTodos.length > 0 && (
+                  <div className="border-b border-white">
+                    {pinnedTodos.map((todo) => (
+                      <TaskItem key={todo.id} todo={todo} />
+                    ))}
+                  </div>
+                )}
+                {unpinnedTodos.map((todo) => (
+                  <TaskItem key={todo.id} todo={todo} />
+                ))}
+              </>
+            ) : (
+              <div className="absolute left-1/2 top-1/4 w-full -translate-x-1/2 -translate-y-1/2 text-center text-3xl text-zinc-200">
+                No tasks for {timeRange.toLowerCase()}
+              </div>
+            )}
+          </TodosList>
+        </ContentContainer>
+      </AppContainer>
+    </ThemeProvider>
   );
-}
+};
 
 export default App;
