@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { TimeRangeType } from "@/lib/utils.ts";
+import { persist } from "zustand/middleware";
 
 export type Todo = {
   id: number;
@@ -26,113 +27,103 @@ type Actions = {
   decrementDay: () => void;
 };
 
-const useTodoStore = create<State & Actions>((set) => ({
-  currentDate: new Date(),
-  timeRange: "Day",
-  todos: [],
-  setTimeRange: (timeRange) => {
-    set(() => ({
-      timeRange: timeRange,
-    }));
-  },
-  setIsPinned: (id) => {
-    set(({ todos }) => ({
-      todos: todos.map((todo) =>
-        todo.id === id ? { ...todo, isPinned: !todo.isPinned } : todo,
-      ),
-    }));
-  },
-  setIsChecked: (id) => {
-    set(({ todos }) => ({
-      todos: todos.map((todo) =>
-        todo.id === id ? { ...todo, isChecked: !todo.isChecked } : todo,
-      ),
-    }));
-  },
-  incrementDay: () => {
-    set(({ currentDate, timeRange }) => {
-      switch (timeRange) {
-        case "Day": {
-          return {
-            currentDate: new Date(
-              new Date(currentDate).setDate(currentDate.getDate() + 1),
-            ),
-          };
-        }
-        case "Month": {
-          return {
-            currentDate: new Date(
-              new Date(currentDate).setMonth(currentDate.getMonth() + 1),
-            ),
-          };
-        }
-        case "Year": {
-          return {
-            currentDate: new Date(
-              new Date(currentDate).setFullYear(currentDate.getFullYear() + 1),
-            ),
-          };
-        }
-      }
-    });
-  },
-  decrementDay: () => {
-    set(({ currentDate, timeRange }) => {
-      switch (timeRange) {
-        case "Day": {
-          return {
-            currentDate: new Date(
-              new Date(currentDate).setDate(currentDate.getDate() - 1),
-            ),
-          };
-        }
-        case "Month": {
-          return {
-            currentDate: new Date(
-              new Date(currentDate).setMonth(currentDate.getMonth() - 1),
-            ),
-          };
-        }
-        case "Year": {
-          return {
-            currentDate: new Date(
-              new Date(currentDate).setFullYear(currentDate.getFullYear() - 1),
-            ),
-          };
-        }
-      }
-    });
-  },
-  editTodo: (id, todoDescription) => {
-    set(({ todos }) => ({
-      todos: todos.map((todo) =>
-        todo.id === id ? { ...todo, todoDescription: todoDescription } : todo,
-      ),
-    }));
-  },
-  addTodo: (newTodo) => {
-    set(({ todos }) => ({
-      todos: [...todos, newTodo],
-    }));
-  },
-  deleteTodo: (id) => {
-    set(({ todos }) => ({
-      todos: todos.filter((todo) => todo.id !== id),
-    }));
-  },
-}));
-
-const initializeStore = () => {
-  try {
-    const storedTodos = localStorage.getItem("todos");
-    if (storedTodos) {
-      useTodoStore.setState({ todos: JSON.parse(storedTodos) });
-    }
-  } catch (error) {
-    console.error("Failed to initialize store from localStorage:", error);
-  }
-};
-
-initializeStore();
+const useTodoStore = create<State & Actions>()(
+  persist(
+    (set) => ({
+      currentDate: new Date(),
+      timeRange: "Day",
+      todos: [],
+      setTimeRange: (timeRange) => {
+        set(() => ({
+          timeRange: timeRange,
+        }));
+      },
+      setIsPinned: (id) => {
+        set(({ todos }) => ({
+          todos: todos.map((todo) =>
+            todo.id === id ? { ...todo, isPinned: !todo.isPinned } : todo,
+          ),
+        }));
+      },
+      setIsChecked: (id) => {
+        set(({ todos }) => ({
+          todos: todos.map((todo) =>
+            todo.id === id ? { ...todo, isChecked: !todo.isChecked } : todo,
+          ),
+        }));
+      },
+      incrementDay: () => {
+        set(({ currentDate, timeRange }) => {
+          const date =
+            typeof currentDate === "string"
+              ? new Date(currentDate)
+              : currentDate;
+          switch (timeRange) {
+            case "Day": {
+              return {
+                currentDate: new Date(date.setDate(date.getDate() + 1)),
+              };
+            }
+            case "Month": {
+              return {
+                currentDate: new Date(date.setMonth(date.getMonth() + 1)),
+              };
+            }
+            case "Year": {
+              return {
+                currentDate: new Date(date.setFullYear(date.getFullYear() + 1)),
+              };
+            }
+          }
+        });
+      },
+      decrementDay: () => {
+        set(({ currentDate, timeRange }) => {
+          const date =
+            typeof currentDate === "string"
+              ? new Date(currentDate)
+              : currentDate;
+          switch (timeRange) {
+            case "Day": {
+              return {
+                currentDate: new Date(date.setDate(date.getDate() - 1)),
+              };
+            }
+            case "Month": {
+              return {
+                currentDate: new Date(date.setMonth(date.getMonth() - 1)),
+              };
+            }
+            case "Year": {
+              return {
+                currentDate: new Date(date.setFullYear(date.getFullYear() - 1)),
+              };
+            }
+          }
+        });
+      },
+      editTodo: (id, todoDescription) => {
+        set(({ todos }) => ({
+          todos: todos.map((todo) =>
+            todo.id === id
+              ? { ...todo, todoDescription: todoDescription }
+              : todo,
+          ),
+        }));
+      },
+      addTodo: (newTodo) => {
+        set(({ todos }) => ({
+          todos: [...todos, newTodo],
+        }));
+      },
+      deleteTodo: (id) => {
+        set(({ todos }) => ({
+          todos: todos.filter((todo) => todo.id !== id),
+        }));
+      },
+    }),
+    { name: "todo-storage" },
+  ),
+);
 
 export default useTodoStore;

@@ -11,7 +11,6 @@ import { MenuBar, MenuBarButton } from "@/components/ui/menu-bar";
 import TodosList from "@/components/todos-list";
 import useFilteredTodos from "@/hooks/use-filtred-todos.ts";
 import { useShallow } from "zustand/react/shallow";
-import useLocalStorageUpdate from "@/hooks/use-local-storage-update.ts";
 
 const TIME_RANGES: TimeRangeType[] = ["Day", "Month", "Year"];
 
@@ -25,7 +24,9 @@ const App = () => {
   );
   const filteredTodos = useFilteredTodos();
 
-  useLocalStorageUpdate();
+  const currentDateObj = new Date(currentDate);
+
+  // useLocalStorageUpdate();
 
   const { pinnedTodos, unpinnedTodos } = useMemo(() => {
     return {
@@ -69,10 +70,10 @@ const App = () => {
               <div className="absolute left-1/2 top-1/4 w-full -translate-x-1/2 -translate-y-1/2 text-center text-3xl text-zinc-200">
                 No tasks for{" "}
                 {timeRange === "Day"
-                  ? DAYS[currentDate.getDay()]
+                  ? DAYS[currentDateObj.getDay()]
                   : timeRange === "Month"
-                    ? MONTHS[currentDate.getMonth()]
-                    : currentDate.getFullYear()}
+                    ? MONTHS[currentDateObj.getMonth()]
+                    : currentDateObj.getFullYear()}
               </div>
             )}
           </TodosList>

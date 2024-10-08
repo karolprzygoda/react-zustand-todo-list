@@ -15,16 +15,18 @@ const CurrentDateSection = () => {
     })),
   );
 
+  const currentDateObj = new Date(currentDate);
+
   const handleTimeRangeChange = () => {
     switch (timeRange) {
       case "Day": {
-        return DAYS[currentDate.getDay()];
+        return DAYS[currentDateObj.getDay()];
       }
       case "Month": {
-        return MONTHS[currentDate.getMonth()];
+        return MONTHS[currentDateObj.getMonth()];
       }
       case "Year": {
-        return currentDate.getFullYear();
+        return currentDateObj.getFullYear();
       }
     }
   };
@@ -48,11 +50,11 @@ const CurrentDateSection = () => {
         </span>
         <span className={"text-md text-zinc-500"}>
           {timeRange === "Day" &&
-            MONTHS[currentDate.getMonth()] +
+            MONTHS[currentDateObj.getMonth()] +
               " " +
-              currentDate.getDate() +
+              currentDateObj.getDate() +
               ", " +
-              currentDate.getFullYear()}
+              currentDateObj.getFullYear()}
         </span>
       </div>
       <ButtonIcon
